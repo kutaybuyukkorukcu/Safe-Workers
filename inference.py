@@ -1,14 +1,14 @@
 import os
 import sys
 
-if( len(sys.argv) != 2 ):
+if( len(sys.argv) != 2 ): #example -> python inference.py video
 	print( "You must define 1 mode: (webcam, video, image)")
 	exit()
 
 
 DETECTION_MODE = sys.argv[1] #webcam , video or image
 
-if( DETECTION_MODE not in ["webcam", "video", "image"] ):
+if( DETECTION_MODE not in ["webcam", "video", "image"] ): #check for webcam, video or image
 	print( "Mode must be one of these: (webcam, video, image) ")
 	exit()
 
@@ -26,7 +26,6 @@ from utils import label_map_util
 from utils import visualization_utils as vis_util
 
 
-
 def detectOnVideo():
 	VIDEO_NAME = 'test1.mp4'
 
@@ -39,15 +38,21 @@ def detectOnVideo():
 	# Open output video file
 	WRITTENVIDEO_PATH = CWD_PATH + "/output.avi"
 
-	frame_width = int(video.get(3))
+	frame_width = int(video.get(3)) # 0 Start / 1 End / 3 Width / 4 Height
 	frame_height = int(video.get(4))
+
+	"""
+	portrait versiyonda frame'i resize etmeyince output yazamıyor nedense
+	inference'daki video kısmı portrait için çalışıyor
+	landscape'te yapmıyoruz onu
+	"""
 
 	new_width = int(frame_width/2)
 	new_height = int(frame_height/2)
 
 	print( "---------",frame_width,",",frame_height,"------FrameCount: ", video.get(7))
 
-	videoWriter = cv2.VideoWriter(WRITTENVIDEO_PATH, cv2.VideoWriter_fourcc('M','J', 'P', 'G'), 
+	videoWriter = cv2.VideoWriter(WRITTENVIDEO_PATH, cv2.VideoWriter_fourcc('M','J', 'P', 'G'),  #fourCC ("four-character code") is a sequence of four bytes used to uniquely identify data formats
 		10,(new_height,new_width))
 
 	fcount=0
@@ -56,10 +61,10 @@ def detectOnVideo():
 		ret, frame = video.read()		
 		if ret == True:
 
-			frame = ndimage.rotate(frame, 270)
-			frame = cv2.resize(frame, (new_height, new_width))
+			frame = ndimage.rotate(frame, 270) # Portrait ozel
+			frame = cv2.resize(frame, (new_height, new_width)) 
 			
-			frame_expanded = np.expand_dims(frame, axis=0)
+			frame_expanded = np.expand_dims(frame, axis=0) # Verilen axis degerine gore verilen ilk parametreyi genisletiyor (frame)
 		    # Perform the actual detection by running the model with the image as input
 			(boxes, scores, classes, num) = sess.run(
 				[detection_boxes, detection_scores, detection_classes, num_detections],
@@ -78,7 +83,7 @@ def detectOnVideo():
 
 			videoWriter.write(frame)
 
-			if( fcount % 20 == 0 ):
+			if( fcount % 20 == 0 ): 
 				print(fcount)
 
 			fcount = fcount + 1
@@ -94,18 +99,18 @@ def detectOnVideo():
 	# Clean up
 	video.release()
 	videoWriter.release()
-	cv2.destroyAllWindows()
+	# cv2.destroyAllWindows() 
 
 def detectOnImage():
-	IMAGE_NAME = 'test1.jpg'
+	IMAGE_NAME = 'test1.png'
 
 	# Path to image
 	PATH_TO_IMAGE = os.path.join(CWD_PATH,IMAGE_NAME)
 	# Load image using OpenCV and
 	# expand image dimensions to have shape: [1, None, None, 3]
 	# i.e. a single-column array, where each item in the column has the pixel RGB value
-	image = cv2.imread(PATH_TO_IMAGE)
-	image_expanded = np.expand_dims(image, axis=0)
+	image = cv2.imread(PATH_TO_IMAGE) # reads an image 
+	image_expanded = np.expand_dims(image, axis=0) 
 
 	# Perform the actual detection by running the model with the image as input
 	(boxes, scores, classes, num) = sess.run(
@@ -116,9 +121,7 @@ def detectOnImage():
 
 	print(boxes.shape, scores.shape, classes.shape, num.shape)
 
-	print(boxes[0][0], scores[0][0], classes[0][0])
-	#print boxes[0][:5] , "--", scores[0][:5], "--", classes[0][:5], "--", num[0]
-	#print classes[0][40:80]
+	print(boxes, scores, classes)
 
 	vis_util.visualize_boxes_and_labels_on_image_array(
 	    image,
@@ -131,7 +134,7 @@ def detectOnImage():
 	    min_score_thresh=0.60) # default is 0.6
 
 	# All the results have been drawn on image. Now display the image.
-	cv2.imshow('Object detector', image)
+	cv2.imshow('Object detector', image) # displays an image in a window
 
 	# Press any key to close the image
 	cv2.waitKey(0)
@@ -169,7 +172,7 @@ def detectOnWebcam():
 	        min_score_thresh=0.60)
 
 	    # All the results have been drawn on the frame, so it's time to display it.
-	    cv2.imshow('Object detector', frame)
+	    cv2.imshow('Object detector', frame) # displays an image in a window
 
 	    # Press 'q' to quit
 	    if cv2.waitKey(1) == ord('q'):
@@ -182,7 +185,7 @@ def detectOnWebcam():
 
 
 # Name of the directory containing the object detection module we're using
-MODEL_NAME = 'inference_graph'
+MODEL_NAME = 'Frozen_graph'
 
 # Grab path to current working directory
 CWD_PATH = os.getcwd()
@@ -192,11 +195,13 @@ CWD_PATH = os.getcwd()
 PATH_TO_CKPT = os.path.join(CWD_PATH,MODEL_NAME,'frozen_inference_graph.pb')
 
 # Path to label map file
-PATH_TO_LABELS = os.path.join(CWD_PATH,'training','labelmap.pbtxt')
+PATH_TO_LABELS = os.path.join(CWD_PATH,'overfit files','labelmap.pbtxt')
 
 # Number of classes the object detector can identify
 NUM_CLASSES = 9
 
+# labelmaplerin sirasiyla category_index'ine donusturulmesi
+# overfit files altinda labelmap.pbtxt var istenen formatta item adi ile girilmis labellar mevcut
 label_map = label_map_util.load_labelmap(PATH_TO_LABELS)
 categories = label_map_util.convert_label_map_to_categories(label_map, max_num_classes=NUM_CLASSES, use_display_name=True)
 category_index = label_map_util.create_category_index(categories)
@@ -224,7 +229,7 @@ detection_boxes = detection_graph.get_tensor_by_name('detection_boxes:0')
 # Each score represents level of confidence for each of the objects.
 # The score is shown on the result image, together with the class label.
 detection_scores = detection_graph.get_tensor_by_name('detection_scores:0')
-detection_classes = detection_graph.get_tensor_by_name('detection_classes:0')
+detection_classes = detection_graph.get_tensor_by_name('detection_classes:0') # labelmapler
 
 # Number of objects detected
 num_detections = detection_graph.get_tensor_by_name('num_detections:0')
@@ -235,5 +240,3 @@ elif( DETECTION_MODE == "image"):
 	detectOnImage()
 else:
 	detectOnWebcam()
-
-
