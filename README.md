@@ -4,9 +4,9 @@
 
 Built using Tensorflow's Faster RCNN model for object detection and using Ageitgey's face_recognition API for face recognition.
 
-### Output Example
 
-(output_example.png)
+
+![Output Example|(output_example.png)
 
 ### Dockerfile implementation will be added. Researching CUDA/Docker relation.
 
