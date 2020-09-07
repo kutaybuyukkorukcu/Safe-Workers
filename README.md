@@ -1,4 +1,14 @@
-<h2> Dockerfile implementation will be added. Researching CUDA/Docker relation. </h2>
+# Safe Workers
+
+! Model files for object detection will be added. 
+
+Built using Tensorflow's Faster RCNN model for object detection and using Ageitgey's face_recognition API for face recognition.
+
+### Output Example
+
+(output_example.png)
+
+### Dockerfile implementation will be added. Researching CUDA/Docker relation.
 
 Installation Guide 
 
