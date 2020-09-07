@@ -4,7 +4,7 @@
 
 Built using Tensorflow's Faster RCNN model for object detection and using Ageitgey's face_recognition API for face recognition.
 
-
+### Output Example
 
 ![Output Example](output_example.png)
 
